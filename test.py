@@ -8,8 +8,8 @@ model = YOLO("best.pt")  # Ensure best.pt is in the same directory
 cap = cv2.VideoCapture(0)
 
 # Set camera resolution (optional)
-cap.set(3, 640)  # Width
-cap.set(4, 480)  # Height
+cap.set(3, 1080)  # Width
+cap.set(4, 720)  # Height
 
 try:
     while cap.isOpened():

@@ -45,7 +45,7 @@ pip install ultralytics opencv-python matplotlib
 ## **4️⃣ Run the Person Detection Script**  
 Ensure your **webcam is connected**, then run:  
 ```bash
-python test.py
+py test.py
 ```
 The script will access your **camera** and perform **real-time person detection**.
 
@@ -55,6 +55,7 @@ The script will access your **camera** and perform **real-time person detection*
 
 ```
 📁 your-repo-name/
+|-- .venv                # Virtual environment of the project 
 │-- 📄 best.pt          # Trained YOLOv8 model
 │-- 📄 test.py          # Script to access camera & detect persons
 │-- 📄 .gitignore       # Ignore unnecessary files (e.g., images, venv)

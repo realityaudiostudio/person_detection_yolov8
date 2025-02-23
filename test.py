@@ -11,6 +11,10 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 1080)  # Width
 cap.set(4, 720)  # Height
 
+# Camera and object parameters
+KNOWN_HEIGHT = 170  # Average human height in cm
+FOCAL_LENGTH = 800  # Estimated focal length (adjust based on calibration)
+
 try:
     while cap.isOpened():
         ret, frame = cap.read()
@@ -31,6 +35,10 @@ try:
                 x, y, w, h = box.xywh[0]  # Bounding box (x, y, width, height)
                 cx = x + w / 2  # X-center of bounding box
 
+                # Estimate distance
+                distance = (KNOWN_HEIGHT * FOCAL_LENGTH) / h
+                distance_text = f"{distance:.1f} cm"
+
                 # Determine position
                 if cx < frame_width / 3:
                     position = "Left"
@@ -39,16 +47,17 @@ try:
                 else:
                     position = "Center"
 
-                # Draw bounding box
+                # Draw bounding box and text
                 x1, y1, x2, y2 = box.xyxy[0]  # Convert to (x1, y1, x2, y2) format
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
-                cv2.putText(frame, position, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.putText(frame, f"{position}, {distance_text}", (int(x1), int(y1) - 10), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         # Add person count
         cv2.putText(frame, f"Persons: {num_persons}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
         # Show frame
-        cv2.imshow("Live Person Detection", frame)
+        cv2.imshow("Live Person Detection with Distance Estimation", frame)
 
         # Press 'q' to exit
         if cv2.waitKey(1) & 0xFF == ord('q'):

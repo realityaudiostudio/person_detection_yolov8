@@ -1,8 +1,8 @@
 import socket
 
-# Set up socket
-HOST = "0.0.0.0"  # Listen on all network interfaces
-PORT = 5002
+# Set up socket to receive data from Laptop
+HOST = "0.0.0.0"  # Listen on all interfaces
+PORT = 5002  # Matches PI_PORT in laptop script
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((HOST, PORT))
 server_socket.listen(1)
@@ -24,10 +24,10 @@ try:
 
 except KeyboardInterrupt:
     print("❌ Stopped by user.")
+except Exception as e:
+    print(f"Error: {e}")
 
 finally:
     conn.close()
     server_socket.close()
     print("✅ Connection closed.")
-# This script runs on the Raspberry Pi and receives data from the Laptop.
-# It listens for incoming connections on port 5002 and prints the received data.

@@ -8,9 +8,9 @@ from ultralytics import YOLO
 # Load YOLO model
 model = YOLO("best.pt")
 
-# Set up socket
-HOST = "0.0.0.0"  # Listen on all network interfaces
-PORT = 5001
+# Set up socket to receive video from Raspberry Pi
+HOST = "0.0.0.0"  # Listen on all interfaces
+PORT = 5001  # Matches sender port
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((HOST, PORT))
 server_socket.listen(1)
@@ -18,16 +18,16 @@ print("Waiting for Raspberry Pi connection...")
 conn, addr = server_socket.accept()
 print("Connected by:", addr)
 
-# Set up second socket for sending processed data
-PI_HOST = addr[0]
-PI_PORT = 5002
+# Set up socket to send results back to Raspberry Pi
+PI_HOST = addr[0]  # Raspberry Pi's IP
+PI_PORT = 5002  # Matches receiver port
 pi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 pi_socket.connect((PI_HOST, PI_PORT))
 print("Connected to Raspberry Pi for sending data.")
 
 # Camera and object parameters
 KNOWN_HEIGHT = 170  # Average human height in cm
-FOCAL_LENGTH = 800  # Estimated focal length (adjust based on calibration)
+FOCAL_LENGTH = 800  # Adjust based on calibration
 
 try:
     while True:
@@ -45,6 +45,11 @@ try:
         # Deserialize frame
         frame = pickle.loads(data)
 
+        # Display the frame
+        cv2.imshow("Raspberry Pi Camera Feed", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
         # Run YOLO detection
         results = model.predict(source=frame, show=False)
 
@@ -59,12 +64,12 @@ try:
                 cx = x + w / 2  # X-center of bounding box
 
                 # Calculate deviation from center
-                x_deviation = (cx - frame_width / 2) / (frame_width / 2)  # Normalized deviation (-1 to 1)
+                x_deviation = (cx - frame_width / 2) / (frame_width / 2)  # Normalized (-1 to 1)
                 
                 # Estimate distance
                 distance = (KNOWN_HEIGHT * FOCAL_LENGTH) / h
 
-                # Prepare data to send
+                # Prepare and send data
                 data_to_send = f"{x_deviation:.2f},{distance:.2f}"
                 pi_socket.sendall(data_to_send.encode())
 
@@ -73,9 +78,12 @@ try:
 
 except KeyboardInterrupt:
     print("❌ Stopped by user.")
+except Exception as e:
+    print(f"Error: {e}")
 
 finally:
     conn.close()
     pi_socket.close()
     server_socket.close()
+    cv2.destroyAllWindows()
     print("✅ Connection closed.")

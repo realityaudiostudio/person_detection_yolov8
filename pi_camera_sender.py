@@ -3,12 +3,12 @@ import socket
 import struct
 import pickle
 
-# Raspberry Pi - Set up the camera
-cap = cv2.VideoCapture(0)  # Use the Raspberry Pi camera (or change if using a USB camera)
+# Set up the camera
+cap = cv2.VideoCapture(0)  # Use the Raspberry Pi camera
 
 # Set up socket
-HOST = "192.168.1.100"  # Change this to your laptop's IP address
-PORT = 5001
+HOST = "192.168.33.30"  # Change to your laptop's IP address
+PORT = 5001  # Port to send video to laptop
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((HOST, PORT))
 print("Connected to Laptop.")
@@ -28,6 +28,8 @@ try:
 
 except KeyboardInterrupt:
     print("❌ Stopped by user.")
+except Exception as e:
+    print(f"Error: {e}")
 
 finally:
     cap.release()
